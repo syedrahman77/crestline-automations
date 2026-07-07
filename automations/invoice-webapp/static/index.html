@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Invoice Processor — Crestline Manufacturing</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #f5f5f5;
+      color: #333;
+      min-height: 100vh;
+      padding: 40px 20px;
+    }
+
+    .container {
+      max-width: 640px;
+      margin: 0 auto;
+    }
+
+    header {
+      margin-bottom: 32px;
+    }
+
+    header h1 {
+      font-size: 24px;
+      font-weight: 600;
+      color: #111;
+    }
+
+    header p {
+      color: #666;
+      margin-top: 6px;
+      font-size: 14px;
+    }
+
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 28px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+      margin-bottom: 20px;
+    }
+
+    .card h2 {
+      font-size: 16px;
+      font-weight: 600;
+      margin-bottom: 16px;
+      color: #111;
+    }
+
+    /* Upload Zone */
+    .upload-zone {
+      border: 2px dashed #ddd;
+      border-radius: 8px;
+      padding: 40px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .upload-zone:hover, .upload-zone.dragover {
+      border-color: #2563eb;
+      background: #eff6ff;
+    }
+
+    .upload-zone input[type="file"] { display: none; }
+
+    .upload-zone .icon { font-size: 36px; margin-bottom: 12px; }
+
+    .upload-zone p {
+      color: #555;
+      font-size: 14px;
+    }
+
+    .upload-zone span {
+      color: #2563eb;
+      font-weight: 500;
+      cursor: pointer;
+    }
+
+    /* Status */
+    .status {
+      padding: 10px 14px;
+      border-radius: 6px;
+      font-size: 14px;
+      margin-top: 16px;
+      display: none;
+    }
+
+    .status.processing { background: #fef9c3; color: #854d0e; display: block; }
+    .status.success    { background: #dcfce7; color: #166534; display: block; }
+    .status.error      { background: #fee2e2; color: #991b1b; display: block; }
+    .status.warning    { background: #fef3c7; color: #92400e; display: block; }
+
+    /* Form Fields */
+    .field-group {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .field.full { grid-column: 1 / -1; }
+
+    label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #555;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    input {
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 8px 12px;
+      font-size: 14px;
+      color: #111;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input:focus { border-color: #2563eb; }
+
+    input.missing { border-color: #f59e0b; background: #fffbeb; }
+
+    .missing-note {
+      font-size: 12px;
+      color: #92400e;
+      margin-top: -8px;
+      margin-bottom: 4px;
+    }
+
+    /* Buttons */
+    .btn {
+      padding: 10px 20px;
+      border-radius: 6px;
+      border: none;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: #2563eb;
+      color: white;
+      width: 100%;
+      padding: 12px;
+      font-size: 15px;
+    }
+
+    .btn-primary:hover { background: #1d4ed8; }
+    .btn-primary:disabled { background: #93c5fd; cursor: not-allowed; }
+
+    /* Results card — hidden until data loads */
+    #results-card { display: none; }
+
+    /* Success state */
+    .success-banner {
+      text-align: center;
+      padding: 20px;
+      display: none;
+    }
+
+    .success-banner .check { font-size: 48px; }
+    .success-banner h3 { margin-top: 12px; font-size: 18px; color: #166534; }
+    .success-banner p  { color: #555; font-size: 14px; margin-top: 6px; }
+
+    .btn-reset {
+      background: #f3f4f6;
+      color: #374151;
+      margin-top: 16px;
+    }
+
+    .btn-reset:hover { background: #e5e7eb; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Invoice Processor</h1>
+      <p>Crestline Manufacturing — Upload a PDF invoice to extract and save data automatically.</p>
+    </header>
+
+    <!-- Upload Card -->
+    <div class="card" id="upload-card">
+      <h2>Upload Invoice</h2>
+      <div class="upload-zone" id="upload-zone">
+        <input type="file" id="file-input" accept=".pdf">
+        <div class="icon">📄</div>
+        <p><span onclick="document.getElementById('file-input').click()">Click to upload</span> or drag and drop</p>
+        <p style="margin-top:6px; color:#999; font-size:13px;">PDF files only</p>
+      </div>
+      <div class="status" id="upload-status"></div>
+    </div>
+
+    <!-- Results Card -->
+    <div class="card" id="results-card">
+      <h2>Review Extracted Data</h2>
+      <p style="font-size:13px; color:#666; margin-bottom:20px;">
+        Review the extracted data below. Edit any fields if needed, then save to Airtable.
+      </p>
+
+      <div id="missing-note" class="missing-note" style="display:none;">
+        ⚠ Some fields could not be extracted. Please fill them in manually.
+      </div>
+
+      <div class="field-group">
+        <div class="field full">
+          <label>Vendor Name</label>
+          <input type="text" id="vendor_name" placeholder="Vendor name">
+        </div>
+        <div class="field">
+          <label>Invoice Number</label>
+          <input type="text" id="invoice_number" placeholder="e.g. INV-2024-001">
+        </div>
+        <div class="field">
+          <label>Amount ($)</label>
+          <input type="number" id="amount" placeholder="0.00" step="0.01">
+        </div>
+        <div class="field">
+          <label>Invoice Date</label>
+          <input type="date" id="invoice_date">
+        </div>
+        <div class="field">
+          <label>Due Date</label>
+          <input type="date" id="due_date">
+        </div>
+      </div>
+
+      <div style="margin-top: 24px;">
+        <button class="btn btn-primary" id="save-btn" onclick="saveInvoice()">
+          Save to Airtable
+        </button>
+      </div>
+
+      <div class="status" id="save-status"></div>
+    </div>
+
+    <!-- Success Banner -->
+    <div class="card" id="success-card" style="display:none;">
+      <div class="success-banner" style="display:block;">
+        <div class="check">✅</div>
+        <h3>Invoice Saved!</h3>
+        <p id="success-detail">The invoice has been saved to Airtable successfully.</p>
+        <button class="btn btn-reset" onclick="resetForm()">Process Another Invoice</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    let currentFile = null;
+
+    // ── Drag & Drop ──
+    const zone = document.getElementById('upload-zone');
+
+    zone.addEventListener('dragover', e => {
+      e.preventDefault();
+      zone.classList.add('dragover');
+    });
+
+    zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+
+    zone.addEventListener('drop', e => {
+      e.preventDefault();
+      zone.classList.remove('dragover');
+      const file = e.dataTransfer.files[0];
+      if (file) handleFile(file);
+    });
+
+    document.getElementById('file-input').addEventListener('change', e => {
+      if (e.target.files[0]) handleFile(e.target.files[0]);
+      e.target.value = '';  // Reset so same file can be selected again
+    });
+
+    // ── Upload & Extract ──
+    async function handleFile(file) {
+      if (!file.name.toLowerCase().endsWith('.pdf')) {
+        showStatus('upload-status', 'error', 'Please upload a PDF file.');
+        return;
+      }
+
+      currentFile = file;
+      showStatus('upload-status', 'processing', `⏳ Processing ${file.name}...`);
+
+      const formData = new FormData();
+      formData.append('file', file);
+
+      try {
+        const res = await fetch('/upload', { method: 'POST', body: formData });
+        const data = await res.json();
+
+        if (!res.ok) {
+          showStatus('upload-status', 'error', `Error: ${data.detail}`);
+          return;
+        }
+
+        populateForm(data);
+        showStatus('upload-status', 'success', `✓ Extracted data from ${file.name}`);
+        document.getElementById('results-card').style.display = 'block';
+        document.getElementById('results-card').scrollIntoView({ behavior: 'smooth' });
+
+      } catch (err) {
+        showStatus('upload-status', 'error', `Network error: ${err.message}`);
+      }
+    }
+
+    // ── Populate Form ──
+    function populateForm(data) {
+      document.getElementById('vendor_name').value    = data.vendor_name    || '';
+      document.getElementById('invoice_number').value = data.invoice_number || '';
+      document.getElementById('amount').value         = data.amount         || '';
+      document.getElementById('invoice_date').value   = data.invoice_date   || '';
+      document.getElementById('due_date').value       = data.due_date       || '';
+
+      // Highlight missing fields
+      const missing = data.missing_fields || [];
+      const fieldMap = {
+        vendor_name: 'vendor_name', invoice_number: 'invoice_number',
+        amount: 'amount', invoice_date: 'invoice_date', due_date: 'due_date'
+      };
+
+      Object.entries(fieldMap).forEach(([key, id]) => {
+        const el = document.getElementById(id);
+        if (missing.includes(key)) {
+          el.classList.add('missing');
+        } else {
+          el.classList.remove('missing');
+        }
+      });
+
+      const noteEl = document.getElementById('missing-note');
+      noteEl.style.display = missing.length > 0 ? 'block' : 'none';
+    }
+
+    // ── Save to Airtable ──
+    async function saveInvoice() {
+      const btn = document.getElementById('save-btn');
+      btn.disabled = true;
+      btn.textContent = 'Saving...';
+      showStatus('save-status', 'processing', '⏳ Saving to Airtable...');
+
+      const payload = {
+        vendor_name:    document.getElementById('vendor_name').value,
+        invoice_number: document.getElementById('invoice_number').value,
+        amount:         parseFloat(document.getElementById('amount').value) || null,
+        invoice_date:   document.getElementById('invoice_date').value || null,
+        due_date:       document.getElementById('due_date').value || null,
+        source_file:    currentFile?.name || null,
+      };
+
+      try {
+        const res = await fetch('/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          const message = data.detail || 'An error occurred. Please try again.';
+          showStatus('save-status', 'error', `⚠ ${message}`);
+          document.getElementById('save-status').scrollIntoView({ behavior: 'smooth' });
+          btn.disabled = false;
+          btn.textContent = 'Save to Airtable';
+          return;
+        }
+
+        document.getElementById('success-detail').textContent =
+          `Saved successfully. Airtable record ID: ${data.record_id}`;
+        document.getElementById('results-card').style.display = 'none';
+        document.getElementById('success-card').style.display = 'block';
+        document.getElementById('success-card').scrollIntoView({ behavior: 'smooth' });
+
+        // Disable upload zone until user clicks "Process Another Invoice"
+        const zone = document.getElementById('upload-zone');
+        zone.style.opacity = '0.4';
+        zone.style.pointerEvents = 'none';
+        document.getElementById('file-input').disabled = true;
+
+      } catch (err) {
+        showStatus('save-status', 'error', `Network error: ${err.message}`);
+        btn.disabled = false;
+        btn.textContent = 'Save to Airtable';
+      }
+    }
+
+    // ── Reset ──
+    function resetForm() {
+      currentFile = null;
+      document.getElementById('file-input').value = '';
+      document.getElementById('results-card').style.display = 'none';
+      document.getElementById('success-card').style.display = 'none';
+      showStatus('upload-status', '', '');
+      showStatus('save-status', '', '');
+      const btn = document.getElementById('save-btn');
+      btn.disabled = false;
+      btn.textContent = 'Save to Airtable';
+
+      // Re-enable upload zone
+      const zone = document.getElementById('upload-zone');
+      zone.style.opacity = '1';
+      zone.style.pointerEvents = 'auto';
+      document.getElementById('file-input').disabled = false;
+
+      document.getElementById('upload-card').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // ── Helper ──
+    function showStatus(id, type, message) {
+      const el = document.getElementById(id);
+      el.className = `status ${type}`;
+      el.textContent = message;
+      el.style.display = type ? '' : 'none';
+    }
+  </script>
+</body>
+</html>

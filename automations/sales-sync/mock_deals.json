@@ -1,0 +1,110 @@
+[
+  {
+    "Deal Name": "Annual Maintenance Contract",
+    "Company": "Acme Corp",
+    "Industry": "Manufacturing",
+    "Company Size": "500-1000",
+    "Amount": 48000,
+    "Close Date": "2026-03-15",
+    "Stage": "Closed Won",
+    "Owner": "Jennifer Wu",
+    "Territory": "North East",
+    "Probability": 100
+  },
+  {
+    "Deal Name": "Equipment Upgrade Package",
+    "Company": "TechParts Direct",
+    "Industry": "Technology",
+    "Company Size": "100-500",
+    "Amount": 125000,
+    "Close Date": "2026-04-01",
+    "Stage": "Negotiation",
+    "Owner": "Mike Chen",
+    "Territory": "West Coast",
+    "Probability": 75
+  },
+  {
+    "Deal Name": "Supply Chain Consulting",
+    "Company": "Global Shipping Solutions",
+    "Industry": "Logistics",
+    "Company Size": "1000+",
+    "Amount": 32000,
+    "Close Date": "2026-03-28",
+    "Stage": "Proposal",
+    "Owner": "Amy Torres",
+    "Territory": "South",
+    "Probability": 50
+  },
+  {
+    "Deal Name": "Safety Equipment Bundle",
+    "Company": "Widget Supplies Inc",
+    "Industry": "Manufacturing",
+    "Company Size": "50-100",
+    "Amount": 18500,
+    "Close Date": "2026-03-10",
+    "Stage": "Closed Won",
+    "Owner": "Jennifer Wu",
+    "Territory": "North East",
+    "Probability": 100
+  },
+  {
+    "Deal Name": "Office Automation Suite",
+    "Company": "Office Depot Industrial",
+    "Industry": "Retail",
+    "Company Size": "1000+",
+    "Amount": 67000,
+    "Close Date": "2026-04-15",
+    "Stage": "Qualified",
+    "Owner": "Mike Chen",
+    "Territory": "West Coast",
+    "Probability": 30
+  },
+  {
+    "Deal Name": "Warehouse Management System",
+    "Company": "FastLog Corp",
+    "Industry": "Logistics",
+    "Company Size": "100-500",
+    "Amount": 94000,
+    "Close Date": "2026-05-01",
+    "Stage": "Prospecting",
+    "Owner": "Amy Torres",
+    "Territory": "Midwest",
+    "Probability": 15
+  },
+  {
+    "Deal Name": "Preventive Maintenance Plan",
+    "Company": "BuildRight Ltd",
+    "Industry": "Construction",
+    "Company Size": "50-100",
+    "Amount": 22000,
+    "Close Date": "2026-03-20",
+    "Stage": "Closed Won",
+    "Owner": "Jennifer Wu",
+    "Territory": "North East",
+    "Probability": 100
+  },
+  {
+    "Deal Name": "Custom Parts Order",
+    "Company": "AutoParts Pro",
+    "Industry": "Automotive",
+    "Company Size": "100-500",
+    "Amount": 55000,
+    "Close Date": "2026-04-10",
+    "Stage": "Negotiation",
+    "Owner": "Mike Chen",
+    "Territory": "South",
+    "Probability": 80
+  },
+  {
+    "Deal Name": "Legacy System Replacement",
+    "Company": "OldTech Industries",
+    "Industry": "Manufacturing",
+    "Company Size": "100-500",
+    "Amount": 78000,
+    "Close Date": "2026-02-28",
+    "Stage": "Closed Lost",
+    "Owner": "Amy Torres",
+    "Territory": "Midwest",
+    "Probability": 0
+  }
+]
